@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import Image from "next/image";
 import { ChatKitPanel, type FactAction } from "@/components/ChatKitPanel";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -32,9 +33,11 @@ export default function App() {
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500">
-            <img
+            <Image
               src="/avatar.png"
               alt="Annie"
+              width={40}
+              height={40}
               className="w-full h-full object-cover"
             />
           </div>

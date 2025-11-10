@@ -10,6 +10,7 @@ import {
   WORKFLOW_ID,
   getThemeConfig,
 } from "@/lib/config";
+import { sendThreadIdToWebhook } from "@/lib/webhook";
 import { ErrorOverlay } from "./ErrorOverlay";
 import type { ColorScheme } from "@/hooks/useColorScheme";
 
@@ -50,6 +51,8 @@ export function ChatKitPanel({
   onThemeRequest,
 }: ChatKitPanelProps) {
   const processedFacts = useRef(new Set<string>());
+  const currentThreadId = useRef<string | null>(null);
+  const lastSentTimestamp = useRef<number>(0);
   const [errors, setErrors] = useState<ErrorState>(() => createInitialErrors());
   const [isInitializingSession, setIsInitializingSession] = useState(true);
   const isMountedRef = useRef(true);
@@ -318,9 +321,26 @@ export function ChatKitPanel({
       onResponseEnd();
     },
     onResponseStart: () => {
+      // Send webhook once per user message (when AI starts responding)
+      const now = Date.now();
+      const timeSinceLastSent = now - lastSentTimestamp.current;
+
+      // Only send if we have a thread_id and it's been at least 1 second since last send
+      // This prevents duplicate sends if onResponseStart fires multiple times
+      if (currentThreadId.current && timeSinceLastSent > 1000) {
+        lastSentTimestamp.current = now;
+        void sendThreadIdToWebhook(currentThreadId.current);
+      }
+
       setErrorState({ integration: null, retryable: false });
     },
-    onThreadChange: () => {
+    onThreadChange: (event: { threadId: string | null }) => {
+      if (event.threadId && event.threadId !== currentThreadId.current) {
+        // New thread detected - send webhook immediately for first message
+        currentThreadId.current = event.threadId;
+        lastSentTimestamp.current = Date.now();
+        void sendThreadIdToWebhook(event.threadId);
+      }
       processedFacts.current.clear();
     },
     onError: ({ error }: { error: unknown }) => {
