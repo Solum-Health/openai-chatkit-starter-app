@@ -183,6 +183,34 @@
       border-radius: 4px;
       font-family: 'Courier New', monospace;
     }
+
+    /* Notification badge pulse animation */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 6px rgba(255, 59, 48, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
+      }
+    }
+
+    /* Notification message slide in animation */
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -295,12 +323,26 @@
   </footer>
 
   <!-- Chat Widget (from webflow.html) -->
+  <!-- Notification Message Bubble -->
+  <div id="notification-message"
+       style="display: none; position: fixed; bottom: 100px; right: 24px; background-color: white; color: #333; padding: 14px 18px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 9998; max-width: 240px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; animation: slideIn 0.4s ease-out; font-weight: 500;">
+    How can I help? 👋
+    <!-- Message tail/pointer -->
+    <div style="position: absolute; bottom: -6px; right: 20px; width: 14px; height: 14px; background-color: white; transform: rotate(45deg);"></div>
+  </div>
+
   <!-- Chat Bubble -->
   <div id="chat-bubble"
-       style="position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; border-radius: 50%; background-color: #007AFF; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s;"
+       style="position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; cursor: pointer; z-index: 9999; transition: transform 0.3s;"
        onmouseover="this.style.transform='scale(1.1)'"
        onmouseout="this.style.transform='scale(1)'">
-    <span style="font-size: 32px;">💬</span>
+    <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <img src="avatar.png" alt="Chat" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+    <!-- Notification Badge (small dot indicator) -->
+    <div id="notification-badge"
+         style="display: none; position: absolute; top: -2px; right: -2px; background-color: #FF3B30; border-radius: 50%; width: 16px; height: 16px; border: 2px solid white; animation: pulse 2s infinite;">
+    </div>
   </div>
 
   <!-- Chat iframe (hidden by default) -->
@@ -309,45 +351,91 @@
           style="display: none; position: fixed; bottom: 100px; right: 24px; width: 400px; height: 600px; border: none; border-radius: 16px; box-shadow: 0 0 24px rgba(0,0,0,0.2); z-index: 9998;">
   </iframe>
 
-  <script>
-    const bubble = document.getElementById('chat-bubble');
-    const frame = document.getElementById('chat-iframe');
-    let open = false;
+  <script type="text/javascript">
+    (function() {
+      const NOTIFICATION_DELAY_MS = 100;
+      const AUDIO_URL = "https://efoawoucannrubkjicli.supabase.co/storage/v1/object/public/calls/new-notification-3-398649.mp3";
 
-    bubble.addEventListener('click', () => {
-      open = !open;
-      frame.style.display = open ? 'block' : 'none';
+      // Elements
+      const bubble = document.getElementById('chat-bubble');
+      const frame = document.getElementById('chat-iframe');
+      const badge = document.getElementById('notification-badge');
+      const message = document.getElementById('notification-message');
 
-      // Optional: Log to console for debugging
-      console.log('Chat widget', open ? 'opened' : 'closed');
-    });
+      // State
+      let open = false;
+      let notificationFired = false;
+      let gestureSeen = false;
 
-    // Optional: Close on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && open) {
-        open = false;
-        frame.style.display = 'none';
-        console.log('Chat widget closed via Escape key');
+      // Audio setup
+      const audio = new Audio(AUDIO_URL);
+      audio.preload = 'auto';
+
+      // Handle user gesture
+      function onGesture() {
+        if (gestureSeen) return;
+        gestureSeen = true;
+        maybeShowNotification();
+        ["pointerdown", "click", "touchstart", "keydown"].forEach(evt =>
+          document.removeEventListener(evt, onGesture, { passive: true })
+        );
       }
-    });
 
-    // Optional: Adjust iframe size on mobile
-    function adjustChatSize() {
-      if (window.innerWidth < 768) {
-        frame.style.width = 'calc(100vw - 48px)';
-        frame.style.height = 'calc(100vh - 150px)';
-        frame.style.right = '24px';
-        frame.style.bottom = '100px';
-      } else {
-        frame.style.width = '400px';
-        frame.style.height = '600px';
-        frame.style.right = '24px';
-        frame.style.bottom = '100px';
+      ["pointerdown", "click", "touchstart", "keydown"].forEach(evt =>
+        document.addEventListener(evt, onGesture, { passive: true })
+      );
+
+      // Play notification sound
+      function playChime() {
+        audio.play().catch(() => {});
       }
-    }
 
-    window.addEventListener('resize', adjustChatSize);
-    adjustChatSize();
+      // Show notification after user interaction
+      function maybeShowNotification() {
+        if (notificationFired || !gestureSeen) return;
+        notificationFired = true;
+        setTimeout(() => {
+          message.style.display = 'block';
+          badge.style.display = 'block';
+          playChime();
+        }, NOTIFICATION_DELAY_MS);
+      }
+
+      // Hide notification
+      function hideNotification() {
+        message.style.display = 'none';
+        badge.style.display = 'none';
+      }
+
+      // Toggle chat
+      bubble.addEventListener('click', () => {
+        open = !open;
+        frame.style.display = open ? 'block' : 'none';
+        if (open) hideNotification();
+      });
+
+      // Close on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && open) {
+          open = false;
+          frame.style.display = 'none';
+        }
+      });
+
+      // Adjust iframe size on mobile
+      function adjustChatSize() {
+        if (window.innerWidth < 768) {
+          frame.style.width = 'calc(100vw - 48px)';
+          frame.style.height = 'calc(100vh - 150px)';
+        } else {
+          frame.style.width = '400px';
+          frame.style.height = '600px';
+        }
+      }
+
+      window.addEventListener('resize', adjustChatSize);
+      adjustChatSize();
+    })();
   </script>
 </body>
 </html>

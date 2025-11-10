@@ -1,4 +1,4 @@
-import { ColorScheme, StartScreenPrompt, ThemeOption } from "@openai/chatkit";
+import { ChatKitIcon, ColorScheme, StartScreenPrompt, ThemeOption } from "@openai/chatkit";
 
 export const WORKFLOW_ID =
   process.env.NEXT_PUBLIC_CHATKIT_WORKFLOW_ID?.trim() ?? "";
@@ -7,15 +7,25 @@ export const CREATE_SESSION_ENDPOINT = "/api/create-session";
 
 export const STARTER_PROMPTS: StartScreenPrompt[] = [
   {
-    label: "What can you do?",
-    prompt: "What can you do?",
+    label: "How does Solum automate my practice?",
+    prompt: "How does Solum Health automate administrative tasks for my therapy practice?",
+    icon: "sparkle",
+  },
+  {
+    label: "Does Solum integrate with my EHR?",
+    prompt: "Does Solum Health integrate with my existing EHR system?",
     icon: "circle-question",
+  },
+  {
+    label: "How does prior authorization work?",
+    prompt: "How does Solum Health handle Verification of Benefits?",
+    icon: "check-circle",
   },
 ];
 
-export const PLACEHOLDER_INPUT = "Ask anything...";
+export const PLACEHOLDER_INPUT = "Ask about Solum Health...";
 
-export const GREETING = "How can I help you today?";
+export const GREETING = "Welcome to Solum Health! How can I help you today?";
 
 export const getThemeConfig = (theme: ColorScheme): ThemeOption => ({
   color: {
