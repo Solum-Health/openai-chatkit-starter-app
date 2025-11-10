@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Project Overviews
 
 This is a Next.js starter application for OpenAI's ChatKit, which integrates OpenAI-hosted workflows built using Agent Builder. The app is a minimal chat interface that connects to OpenAI workflows via the ChatKit web component.
 
