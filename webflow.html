@@ -1,0 +1,23 @@
+
+<!-- Chat Bubble -->
+<div id="chat-bubble"
+     style="position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; border-radius: 50%; background-color: #007AFF; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9999;">
+  💬
+</div>
+
+<!-- Chat iframe (hidden by default) -->
+<iframe id="chat-iframe"
+        src="https://openai-chatkit-starter-app-beta.vercel.app/"
+        style="display: none; position: fixed; bottom: 100px; right: 24px; width: 400px; height: 600px; border: none; border-radius: 16px; box-shadow: 0 0 24px rgba(0,0,0,0.2); z-index: 9998;">
+</iframe>
+
+<script>
+  const bubble = document.getElementById('chat-bubble');
+  const frame = document.getElementById('chat-iframe');
+  let open = false;
+
+  bubble.addEventListener('click', () => {
+    open = !open;
+    frame.style.display = open ? 'block' : 'none';
+  });
+</script>
