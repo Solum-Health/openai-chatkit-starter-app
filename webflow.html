@@ -130,5 +130,13 @@
 
     window.addEventListener('resize', adjustChatSize);
     adjustChatSize();
+
+    // Listen for close message from iframe
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'CLOSE_CHAT') {
+        open = false;
+        frame.style.display = 'none';
+      }
+    });
   })();
 </script>
