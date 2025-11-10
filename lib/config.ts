@@ -17,7 +17,7 @@ export const STARTER_PROMPTS: StartScreenPrompt[] = [
     icon: "circle-question",
   },
   {
-    label: "How does prior authorization work?",
+    label: "How does Solum handle Verification of Benefits?",
     prompt: "How does Solum Health handle Verification of Benefits?",
     icon: "check-circle",
   },
